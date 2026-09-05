@@ -48,22 +48,25 @@ export default function Home() {
     }
   };
 
-  const handleGenerateDoc = async () => {
-    setGenerating(true);
-    try {
-      const res = await fetch("/api/generate-doc", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
-      });
-      const data = await res.json();
-      setDocument(data.document);
-    } catch (err) {
-      setDocument("문서 생성 중 에러가 발생했어요.");
-    } finally {
-      setGenerating(false);
-    }
-  };
+const [shareSlug, setShareSlug] = useState<string | null>(null);
+
+const handleGenerateDoc = async () => {
+  setGenerating(true);
+  try {
+    const res = await fetch("/api/generate-doc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages }),
+    });
+    const data = await res.json();
+    setDocument(data.document);
+    setShareSlug(data.shareSlug);
+  } catch (err) {
+    setDocument("문서 생성 중 에러가 발생했어요.");
+  } finally {
+    setGenerating(false);
+  }
+};
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-zinc-50 dark:bg-black px-4 py-10">
@@ -117,9 +120,15 @@ export default function Home() {
         </button>
 
         {document && (
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 whitespace-pre-wrap text-sm mt-2">
-            {document}
-          </div>
+  <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 whitespace-pre-wrap text-sm mt-2">
+    {document}
+  </div>
+        )}
+
+        {shareSlug && (
+  <p className="text-xs text-zinc-400 text-center">
+    공유 코드: {shareSlug}
+  </p>
         )}
       </div>
     </div>
