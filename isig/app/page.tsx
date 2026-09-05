@@ -13,6 +13,8 @@ export default function Home() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [document, setDocument] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -43,6 +45,23 @@ export default function Home() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateDoc = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/generate-doc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
+      const data = await res.json();
+      setDocument(data.document);
+    } catch (err) {
+      setDocument("문서 생성 중 에러가 발생했어요.");
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -88,6 +107,20 @@ export default function Home() {
             전송
           </button>
         </div>
+
+        <button
+          onClick={handleGenerateDoc}
+          disabled={generating}
+          className="text-sm text-zinc-500 underline self-center disabled:opacity-50"
+        >
+          {generating ? "문서 만드는 중..." : "여기까지 대화로 문서 만들기"}
+        </button>
+
+        {document && (
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 whitespace-pre-wrap text-sm mt-2">
+            {document}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
   const chat = model.startChat({ history });
   const lastMessage = messages[messages.length - 1].content;
 
+  
   try {
     const result = await askWithRetry(chat, lastMessage);
     return NextResponse.json({ question: result.response.text() });
