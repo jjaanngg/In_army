@@ -8,22 +8,29 @@ export default async function DocPage({
 }) {
   const { slug } = await params;
 
-  const { data: doc, error } = await supabase
-    .from("documents")
-    .select("content, created_at")
-    .eq("share_slug", slug)
-    .single();
+  const { data, error } = await supabase.rpc("get_document_by_slug", {
+    slug_input: slug,
+  });
+
+  const doc = data?.[0];
 
   if (error || !doc) {
     notFound();
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-zinc-50 dark:bg-black px-4 py-10">
-      <div className="w-full max-w-xl flex flex-col gap-4">
-        <h1 className="text-xl font-semibold text-center">ISIG 인수인계 문서</h1>
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 whitespace-pre-wrap text-sm">
-          {doc.content}
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-[560px] flex-col px-5 py-6">
+        <span className="mb-6 text-[15px] font-extrabold tracking-tight text-[#17191C]">
+          ISIG
+        </span>
+        <div className="rounded-2xl border border-[#EAECEF] bg-white p-6">
+          <div className="mb-3 text-[13px] font-medium text-[#12A594]">
+            공유된 인수인계 문서
+          </div>
+          <div className="whitespace-pre-wrap text-[14px] leading-relaxed text-[#17191C]">
+            {doc.content}
+          </div>
         </div>
       </div>
     </div>

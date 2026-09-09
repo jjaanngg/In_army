@@ -1,6 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -31,40 +30,5 @@ export async function POST(req: NextRequest) {
     .join("\n");
 
   const result = await model.generateContent(conversationText);
-  const docContent = result.response.text();
-
-  // 1. 세션 생성
-  const { data: session, error: sessionError } = await supabase
-    .from("sessions")
-    .insert({ title: "인수인계 인터뷰", status: "done" })
-    .select()
-    .single();
-
-  if (sessionError) {
-    return NextResponse.json({ error: sessionError.message }, { status: 500 });
-  }
-
-  // 2. 메시지들 저장
-  const messageRows = messages.map((m: any) => ({
-    session_id: session.id,
-    role: m.role,
-    content: m.content,
-  }));
-  await supabase.from("messages").insert(messageRows);
-
-  // 3. 문서 저장
-  const { data: doc, error: docError } = await supabase
-    .from("documents")
-    .insert({ session_id: session.id, content: docContent })
-    .select()
-    .single();
-
-  if (docError) {
-    return NextResponse.json({ error: docError.message }, { status: 500 });
-  }
-
-  return NextResponse.json({
-    document: docContent,
-    shareSlug: doc.share_slug,
-  });
+  return NextResponse.json({ document: result.response.text() });
 }
